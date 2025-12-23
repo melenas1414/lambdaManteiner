@@ -65,7 +65,7 @@ Intelligent version management:
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/melenas1414/lambdaManteiner.git
 cd lambda-mantainer
 ```
 
@@ -314,8 +314,9 @@ node --version  # Should show v22.0.0 or higher
 ### Getting Help
 
 If you encounter issues:
-1. Review AWS CloudTrail logs for API errors
-2. Enable verbose logging by setting `NODE_DEBUG=lambda`
+1. Check the [GitHub Issues](https://github.com/melenas1414/lambdaManteiner/issues)
+2. Review AWS CloudTrail logs for API errors
+3. Enable verbose logging by setting `NODE_DEBUG=lambda`
 
 ## 📄 License
 
@@ -342,6 +343,11 @@ We welcome contributions! Here's how you can help:
 - Add tests for new features
 - Update documentation as needed
 - Ensure all tests pass before submitting
+
+## 🔗 Links
+
+- **Repository**: [GitHub](https://github.com/melenas1414/lambdaManteiner)
+- **Issues**: [Issue Tracker](https://github.com/melenas1414/lambdaManteiner/issues)
 
 ---
 
