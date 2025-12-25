@@ -2,6 +2,7 @@
   "name": "lambdamanteiner",
   "version": "1.0.0",
   "description": "AWS Lambda maintenance toolkit for auditing storage usage and cleaning up old function versions",
+  "type": "module",
   "main": "index.js",
   "keywords": [
     "aws",
@@ -24,7 +25,13 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "audit": "node audit.js",
     "cleanup": "node cleanup.js 5 false",
-    "cleanupDryRun": "node cleanup.js 5"
+    "cleanupDryRun": "node cleanup.js 5",
+    "deploy": "serverless deploy",
+    "deploy:dev": "serverless deploy --stage dev",
+    "deploy:prod": "serverless deploy --stage prod",
+    "remove": "serverless remove",
+    "invoke": "serverless invoke -f weeklyCleanup",
+    "logs": "serverless logs -f weeklyCleanup"
   },
   "engines": {
     "node": ">=22.0.0"
@@ -34,5 +41,9 @@
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.957.0",
     "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "serverless": "^3.39.0",
+    "serverless-offline": "^13.8.1"
   }
 }

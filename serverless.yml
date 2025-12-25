@@ -1,0 +1,59 @@
+service: lambda-maintainer
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  region: ${env:AWS_REGION, 'us-east-1'}
+  memorySize: 256
+  timeout: 900  # 15 minutes - cleanup can take time for many functions
+  
+  # IAM permissions for the Lambda function
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - lambda:ListFunctions
+            - lambda:ListVersionsByFunction
+            - lambda:DeleteFunction
+            - lambda:ListAliases
+          Resource: '*'
+  
+  # Environment variables for the Lambda function
+  environment:
+    VERSIONS_TO_KEEP: ${env:VERSIONS_TO_KEEP, '5'}
+    DRY_RUN: ${env:DRY_RUN, 'false'}
+    AWS_REGION: ${env:AWS_REGION, 'us-east-1'}
+
+functions:
+  weeklyCleanup:
+    handler: handler.scheduledCleanup
+    description: Weekly Lambda version cleanup - keeps ${env:VERSIONS_TO_KEEP, '5'} most recent versions
+    events:
+      # Schedule: Run every week on Sunday at 2:00 AM UTC
+      # cron(Minutes Hours Day-of-month Month Day-of-week Year)
+      - schedule:
+          rate: cron(0 2 ? * SUN *)
+          description: 'Weekly Lambda cleanup - runs every Sunday at 2:00 AM UTC'
+          enabled: true
+
+# Package configuration
+package:
+  patterns:
+    - '!node_modules/**'
+    - '!.git/**'
+    - '!.env'
+    - '!audit.js'
+    - '!auditoria.js'
+    - '!cleanup.js'
+    - '!limpieza.js'
+    - '!.gitignore'
+    - '!README.md'
+    - 'handler.js'
+    - 'cleanupService.js'
+    - 'package.json'
+
+plugins:
+  - serverless-offline
