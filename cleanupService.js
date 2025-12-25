@@ -35,7 +35,7 @@ export async function processFunction(client, funcName, versionsToKeep, dryRun) 
       .sort((a, b) => parseInt(b.Version) - parseInt(a.Version));
 
     if (numericVersions.length <= versionsToKeep) {
-      // If you have less than or equal versions to the limit, do nothing
+      // If there are fewer than or equal to versionsToKeep versions, do nothing
       return { deletedCount: 0 };
     }
 

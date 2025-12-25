@@ -1,4 +1,4 @@
-import { LambdaClient } from "@aws-sdk/client-lambda";
+import { LambdaClient, ListFunctionsCommand } from "@aws-sdk/client-lambda";
 import { processFunction } from './cleanupService.js';
 
 // Lambda handler for scheduled cleanup
@@ -28,8 +28,6 @@ export const scheduledCleanup = async (event, context) => {
     let totalFunctionsProcessed = 0;
     let totalVersionsDeleted = 0;
     let functionMarker;
-
-    const { ListFunctionsCommand } = await import("@aws-sdk/client-lambda");
 
     do {
       const listCmd = new ListFunctionsCommand({ Marker: functionMarker });
