@@ -2,6 +2,7 @@
   "name": "lambdamanteiner",
   "version": "1.0.0",
   "description": "AWS Lambda maintenance toolkit for auditing storage usage and cleaning up old function versions",
+  "type": "module",
   "main": "index.js",
   "keywords": [
     "aws",

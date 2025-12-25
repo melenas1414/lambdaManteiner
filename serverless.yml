@@ -52,6 +52,7 @@ package:
     - '!.gitignore'
     - '!README.md'
     - 'handler.js'
+    - 'cleanupService.js'
     - 'package.json'
 
 plugins:

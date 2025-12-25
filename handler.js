@@ -1,9 +1,9 @@
-const { LambdaClient, ListFunctionsCommand, ListVersionsByFunctionCommand, DeleteFunctionCommand } = require("@aws-sdk/client-lambda");
+import { LambdaClient } from "@aws-sdk/client-lambda";
+import { processFunction } from './cleanupService.js';
 
 // Lambda handler for scheduled cleanup
-// Note: This is a self-contained implementation that doesn't depend on cleanup.js
-// This allows the Lambda package to be minimal and the function to be independently deployable
-exports.scheduledCleanup = async (event, context) => {
+// Uses shared cleanupService for consistency with CLI tools
+export const scheduledCleanup = async (event, context) => {
   console.log("========================================");
   console.log("🚀 Starting scheduled Lambda cleanup");
   console.log("Event:", JSON.stringify(event, null, 2));
@@ -13,7 +13,7 @@ exports.scheduledCleanup = async (event, context) => {
   const VERSIONS_TO_KEEP = parseInt(process.env.VERSIONS_TO_KEEP) || 5;
   const REGION = process.env.AWS_REGION || "us-east-1";
   
-  // Scheduled cleanups should always run in production mode (DRY_RUN = false)
+  // Scheduled cleanups should run in production mode by default (DRY_RUN = false)
   const DRY_RUN = process.env.DRY_RUN === 'true';
 
   console.log(`📥 Configuration:`);
@@ -28,6 +28,8 @@ exports.scheduledCleanup = async (event, context) => {
     let totalFunctionsProcessed = 0;
     let totalVersionsDeleted = 0;
     let functionMarker;
+
+    const { ListFunctionsCommand } = await import("@aws-sdk/client-lambda");
 
     do {
       const listCmd = new ListFunctionsCommand({ Marker: functionMarker });
@@ -74,59 +76,3 @@ exports.scheduledCleanup = async (event, context) => {
     };
   }
 };
-
-async function processFunction(client, funcName, VERSIONS_TO_KEEP, DRY_RUN) {
-  try {
-    let versions = [];
-    let versionMarker;
-    
-    // Get all paginated versions
-    do {
-      const vCmd = new ListVersionsByFunctionCommand({ 
-        FunctionName: funcName, 
-        Marker: versionMarker 
-      });
-      const vRes = await client.send(vCmd);
-      versions.push(...(vRes.Versions || []));
-      versionMarker = vRes.NextMarker;
-    } while (versionMarker);
-
-    // Filter $LATEST and sort numerically descending (highest first)
-    const numericVersions = versions
-      .filter(v => v.Version !== "$LATEST")
-      .sort((a, b) => parseInt(b.Version) - parseInt(a.Version));
-
-    if (numericVersions.length <= VERSIONS_TO_KEEP) {
-      // If you have less than or equal versions to the limit, do nothing
-      return { deletedCount: 0 };
-    }
-
-    // The surplus ones are at the end of the list (the oldest)
-    const versionsToDelete = numericVersions.slice(VERSIONS_TO_KEEP);
-    
-    console.log(`🧹 Function: ${funcName} | Total: ${numericVersions.length} | To delete: ${versionsToDelete.length}`);
-
-    let deletedCount = 0;
-    for (const v of versionsToDelete) {
-      if (DRY_RUN) {
-        console.log(`   [DRY RUN] Would delete version: v${v.Version}`);
-      } else {
-        process.stdout.write(`   🔥 Deleting v${v.Version}... `);
-        await client.send(new DeleteFunctionCommand({
-          FunctionName: funcName,
-          Qualifier: v.Version
-        }));
-        console.log("OK");
-        deletedCount++;
-        // Anti-throttling pause
-        await new Promise(r => setTimeout(r, 100)); 
-      }
-    }
-
-    return { deletedCount: DRY_RUN ? 0 : deletedCount };
-
-  } catch (err) {
-    console.error(`   ❌ Error in ${funcName}:`, err.message);
-    return { deletedCount: 0 };
-  }
-}
