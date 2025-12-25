@@ -1,7 +1,7 @@
-import { LambdaClient, ListFunctionsCommand, ListVersionsByFunctionCommand, DeleteFunctionCommand } from "@aws-sdk/client-lambda";
+const { LambdaClient, ListFunctionsCommand, ListVersionsByFunctionCommand, DeleteFunctionCommand } = require("@aws-sdk/client-lambda");
 
 // Lambda handler for scheduled cleanup
-export const scheduledCleanup = async (event, context) => {
+exports.scheduledCleanup = async (event, context) => {
   console.log("========================================");
   console.log("🚀 Starting scheduled Lambda cleanup");
   console.log("Event:", JSON.stringify(event, null, 2));
