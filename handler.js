@@ -1,6 +1,8 @@
 const { LambdaClient, ListFunctionsCommand, ListVersionsByFunctionCommand, DeleteFunctionCommand } = require("@aws-sdk/client-lambda");
 
 // Lambda handler for scheduled cleanup
+// Note: This is a self-contained implementation that doesn't depend on cleanup.js
+// This allows the Lambda package to be minimal and the function to be independently deployable
 exports.scheduledCleanup = async (event, context) => {
   console.log("========================================");
   console.log("🚀 Starting scheduled Lambda cleanup");
