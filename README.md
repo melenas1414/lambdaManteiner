@@ -12,6 +12,8 @@
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Usage](#usage)
+  - [Automated Deployment with Serverless](#automated-deployment-with-serverless)
+  - [Manual CLI Usage](#manual-cli-usage)
 - [Configuration](#configuration)
 - [AWS Permissions](#aws-permissions)
 - [Output Examples](#output-examples)
@@ -50,6 +52,15 @@ Intelligent version management:
 - Preserves `$LATEST` and published aliases
 - Batch processing for efficiency
 - Detailed deletion reports
+
+### ⏰ Scheduled Cleanup (New!)
+
+Automated weekly maintenance with Serverless Framework:
+- Deploy as a Lambda function that runs automatically
+- Scheduled execution once per week (every Sunday at 2:00 AM UTC)
+- Configurable via environment variables
+- No manual intervention required
+- Built-in error handling and logging
 
 ## 📦 Requirements
 
@@ -93,7 +104,92 @@ AWS_REGION=us-east-1
 
 ## 💻 Usage
 
-### Audit Lambda Functions
+### Automated Deployment with Serverless
+
+Deploy the Lambda function to run automatically once per week:
+
+#### 1. Install Serverless Framework Dependencies
+
+```bash
+npm install
+```
+
+#### 2. Configure Environment Variables
+
+Set the number of versions to keep in your environment or `.env` file:
+
+```env
+AWS_REGION=us-east-1
+VERSIONS_TO_KEEP=5
+DRY_RUN=false
+```
+
+Or export them directly:
+
+```bash
+export VERSIONS_TO_KEEP=5
+export DRY_RUN=false
+export AWS_REGION=us-east-1
+```
+
+#### 3. Deploy to AWS
+
+```bash
+npm run deploy
+```
+
+This will:
+- Create a Lambda function in your AWS account
+- Set up a CloudWatch Events rule to trigger it every Sunday at 2:00 AM UTC
+- Configure IAM permissions automatically
+- Set environment variables from your configuration
+
+**For different environments:**
+
+```bash
+npm run deploy:dev   # Deploy to dev stage
+npm run deploy:prod  # Deploy to prod stage
+```
+
+#### 4. Test the Deployed Function
+
+Invoke the function manually to test:
+
+```bash
+npm run invoke
+```
+
+#### 5. View Logs
+
+Check the execution logs:
+
+```bash
+npm run logs
+```
+
+#### 6. Remove Deployment
+
+To remove the Lambda function and all associated resources:
+
+```bash
+npm run remove
+```
+
+**Configuration Options:**
+
+The Lambda function reads these environment variables:
+- `VERSIONS_TO_KEEP`: Number of recent versions to keep (default: 5)
+- `DRY_RUN`: Set to 'true' to preview changes without deleting (default: false)
+- `AWS_REGION`: AWS region to operate in (default: us-east-1)
+
+**Schedule:**
+- By default, runs every Sunday at 2:00 AM UTC
+- Edit `serverless.yml` to change the schedule
+- Uses AWS cron format: `cron(0 2 ? * SUN *)`
+
+### Manual CLI Usage
+
+##### Audit Lambda Functions
 
 Scan all Lambda functions and generate a comprehensive storage report:
 
@@ -115,11 +211,11 @@ npm run audit
 - Total storage occupied by all versions (MB)
 - Account-wide storage total (GB)
 
-### Clean Up Lambda Versions
+#### Clean Up Lambda Versions
 
 Remove old versions while keeping the most recent ones.
 
-#### Dry-Run Mode (Recommended First)
+##### Dry-Run Mode (Recommended First)
 
 Preview what would be deleted without making any changes:
 
@@ -129,7 +225,7 @@ npm run cleanupDryRun
 
 This is a **safe operation** that shows you exactly what would be deleted.
 
-#### Execute Cleanup
+##### Execute Cleanup
 
 Perform the actual cleanup operation:
 
